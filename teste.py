@@ -78,7 +78,7 @@ def Cube(texture_id):
     glEnd()
 
 # Função principal
-def main():
+if __name__ == '__main__':
     pygame.init()
     display = (600, 600)
     pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
@@ -150,5 +150,3 @@ def main():
         
         pygame.display.flip()
         pygame.time.wait(10)
-
-main()
