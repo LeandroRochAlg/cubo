@@ -54,22 +54,23 @@ texture_coords = (
 
 # Carrega a textura
 def load_texture():
-    texture_surface = pygame.image.load(imagem)
-    texture_data = pygame.image.tostring(texture_surface, 'RGB', 1)
-    width = texture_surface.get_width()
-    height = texture_surface.get_height()
+    superficieTextura = pygame.image.load(imagem)
+    infoTextura = pygame.image.tostring(superficieTextura, 'RGB', 1)
+    largura = superficieTextura.get_width()
+    altura = superficieTextura.get_height()
     
+    # Cria a textura
     glEnable(GL_TEXTURE_2D)
-    texture_id = glGenTextures(1)
-    glBindTexture(GL_TEXTURE_2D, texture_id)
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture_data)
+    idTextura = glGenTextures(1)
+    glBindTexture(GL_TEXTURE_2D, idTextura)
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, largura, altura, 0, GL_RGB, GL_UNSIGNED_BYTE, infoTextura)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
-    return texture_id
+    return idTextura
 
 # Desenha o cubo com a textura
-def Cube(texture_id):
-    glBindTexture(GL_TEXTURE_2D, texture_id)
+def Cube(idTextura):
+    glBindTexture(GL_TEXTURE_2D, idTextura)
     glBegin(GL_QUADS)
     for surface in surfaces:
         for i, vertex in enumerate(surface):
@@ -81,19 +82,20 @@ def Cube(texture_id):
 if __name__ == '__main__':
     pygame.init()
     display = (600, 600)
-    pygame.display.set_mode(display, DOUBLEBUF | OPENGL)
+    pygame.display.set_mode(display, DOUBLEBUF | OPENGL) # DOUBLEBUF para evitar flickering e OPENGL para usar OpenGL
     gluPerspective(45, (display[0] / display[1]), 0.1, 50.0)
     glTranslatef(0.0, 0.0, -5)
 
-    scaling_factor = [1.0, 1.0, 1.0]
-    rotation_angle_x = 0
-    rotation_angle_y = 0
-    mouse1_down = False
-    mouse2_down = False
-    last_pos = None
+    fatorEscala = [1.0, 1.0, 1.0]
+    anguloRotacaoX = 0
+    anguloRotacaoY = 0
+    clickMouse1 = False
+    clickMouse2 = False
+    ultimaPos = None
 
-    texture_id = load_texture()
+    idTextura = load_texture()
 
+    # Habilita o uso de texturas e o teste de profundidade
     glEnable(GL_TEXTURE_2D)
     glEnable(GL_DEPTH_TEST)
 
@@ -104,49 +106,51 @@ if __name__ == '__main__':
                 quit()
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 4:  # Scroll up
-                    scaling_factor[0] *= 1.1
-                    scaling_factor[1] *= 1.1
-                    scaling_factor[2] *= 1.1
+                    fatorEscala[0] *= 1.1
+                    fatorEscala[1] *= 1.1
+                    fatorEscala[2] *= 1.1
                 elif event.button == 5:  # Scroll down
-                    scaling_factor[0] *= 0.9
-                    scaling_factor[1] *= 0.9
-                    scaling_factor[2] *= 0.9
+                    fatorEscala[0] *= 0.9
+                    fatorEscala[1] *= 0.9
+                    fatorEscala[2] *= 0.9
                 elif event.button == 1:  # Left mouse button down
-                    mouse1_down = True
-                    last_pos = pygame.mouse.get_pos()
+                    clickMouse1 = True
+                    ultimaPos = pygame.mouse.get_pos()
                 elif event.button == 3:  # Right mouse button down
-                    mouse2_down = True
-                    last_pos = pygame.mouse.get_pos()
+                    clickMouse2 = True
+                    ultimaPos = pygame.mouse.get_pos()
             elif event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:  # Left mouse button up
-                    mouse1_down = False
+                    clickMouse1 = False
                 elif event.button == 3:  # Right mouse button up
-                    mouse2_down = False
+                    clickMouse2 = False
             elif event.type == pygame.MOUSEMOTION:
-                if mouse1_down:
+                if clickMouse1:
                     x, y = pygame.mouse.get_pos()
-                    dx = x - last_pos[0]
-                    dy = y - last_pos[1]
-                    rotation_angle_x += dy * 0.2
-                    rotation_angle_y += dx * 0.2
-                    last_pos = (x, y)
-                elif mouse2_down:
+                    dx = x - ultimaPos[0]
+                    dy = y - ultimaPos[1]
+                    anguloRotacaoX += dy * 0.2
+                    anguloRotacaoY += dx * 0.2
+                    ultimaPos = (x, y)
+                elif clickMouse2:
                     x, y = pygame.mouse.get_pos()
-                    dx = x - last_pos[0]
-                    dy = y - last_pos[1]
+                    dx = x - ultimaPos[0]
+                    dy = y - ultimaPos[1]
                     glTranslatef(dx * 0.01, -dy * 0.01, 0)
-                    last_pos = (x, y)
+                    ultimaPos = (x, y)
         
+        # Limpa o buffer de cor e o buffer de profundidade
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
         
-        glPushMatrix()  # Save the current matrix
-        glScalef(scaling_factor[0], scaling_factor[1], scaling_factor[2])
-        glRotatef(rotation_angle_x, 1, 0, 0)
-        glRotatef(rotation_angle_y, 0, 1, 0)
+        # Desenha o cubo na tela
+        glPushMatrix()  # Salva a matriz atual
+        glScalef(fatorEscala[0], fatorEscala[1], fatorEscala[2])
+        glRotatef(anguloRotacaoX, 1, 0, 0)
+        glRotatef(anguloRotacaoY, 0, 1, 0)
         
-        Cube(texture_id)
+        Cube(idTextura)
         
-        glPopMatrix()  # Restore the previous matrix
+        glPopMatrix()  # Restaura a matriz salva
         
         pygame.display.flip()
         pygame.time.wait(10)
