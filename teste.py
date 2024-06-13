@@ -3,6 +3,9 @@ from pygame.locals import *
 from OpenGL.GL import *
 from OpenGL.GLU import *
 
+# Define o caminho da imagem
+imagem = 'img\Image.jpeg'
+
 # Define os vértices do cubo
 vertices = (
     (1, -1, -1),
@@ -51,7 +54,7 @@ texture_coords = (
 
 # Carrega a textura
 def load_texture():
-    texture_surface = pygame.image.load('Image.jpeg')
+    texture_surface = pygame.image.load(imagem)
     texture_data = pygame.image.tostring(texture_surface, 'RGB', 1)
     width = texture_surface.get_width()
     height = texture_surface.get_height()
